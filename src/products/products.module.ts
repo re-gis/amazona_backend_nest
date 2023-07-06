@@ -1,7 +1,6 @@
-/* eslint-disable prettier/prettier */
 import { Module } from '@nestjs/common';
-import { ProductsService } from './products.service';
 import { ProductsController } from './products.controller';
+import { ProductsService } from './products.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ProductSchema } from 'src/Models/product.schema';
 
@@ -9,7 +8,7 @@ import { ProductSchema } from 'src/Models/product.schema';
   imports: [
     MongooseModule.forFeature([{ name: 'Product', schema: ProductSchema }]),
   ],
-  providers: [ProductsService],
   controllers: [ProductsController],
+  providers: [ProductsService],
 })
 export class ProductsModule {}

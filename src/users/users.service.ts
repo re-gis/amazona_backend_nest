@@ -6,10 +6,14 @@ import { User } from '../types/user';
 import { loginDetails } from '../types/loginDetails';
 import * as bcrypt from 'bcrypt';
 import { registerDetails } from '../types/registerDetails';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class UsersService {
-  constructor(@InjectModel('User') private userModel: Model<User>) {}
+  constructor(
+    @InjectModel('User') private userModel: Model<User>,
+    private jwtService: JwtService,
+  ) {}
 
   async registerUser(userDetails: registerDetails) {
     const { name, email, password } = userDetails;
@@ -53,7 +57,12 @@ export class UsersService {
           HttpStatus.BAD_REQUEST,
         );
       if (await bcrypt.compare(password, user.password)) {
-        return user.depopulate('password');
+        const payload = { email: user.email, password: user.password };
+        return {
+          token: this.jwtService.sign(payload, { secret: 'thisisasecret' }),
+          username: user.name,
+          email: user.email,
+        };
       } else {
         throw new HttpException(
           'Invalid email or password',
@@ -61,5 +70,13 @@ export class UsersService {
         );
       }
     }
+  }
+
+  async validateUser(email: string, password: string): Promise<any> {
+    console.log(
+      `[AuthService] validateUser: email=${email}, password=${password}`,
+    );
+    const user = await this.userModel.findOne({ email });
+    if (!user) throw new HttpException('User not found!', HttpStatus.NOT_FOUND);
   }
 }

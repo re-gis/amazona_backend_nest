@@ -1,8 +1,9 @@
 /* eslint-disable prettier/prettier */
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { loginDetails } from '../types/loginDetails';
 import { registerDetails } from '../types/registerDetails';
+import { LocalAuthGuard } from 'src/auth/LocalAuthGuard';
 
 @Controller('api/users')
 export class UsersController {
@@ -13,6 +14,7 @@ export class UsersController {
     return this.usersService.registerUser(userDetails);
   }
 
+  @UseGuards(LocalAuthGuard)
   @Post('login')
   async loginUser(@Body() userDetails: loginDetails) {
     return this.usersService.loginUser(userDetails);
