@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable prettier/prettier */
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
@@ -38,7 +39,16 @@ export class UsersService {
           'Internal server error...',
           HttpStatus.INTERNAL_SERVER_ERROR,
         );
-      return newUser.depopulate('password');
+
+      const payload = {
+        email: newUser.email,
+        password: newUser.password,
+      };
+      return {
+        token: this.jwtService.sign(payload, { secret: 'thisisasecret' }),
+        name: newUser.name,
+        email: newUser.email,
+      };
     }
   }
 
@@ -72,11 +82,23 @@ export class UsersService {
     }
   }
 
+  async getProfile(id: string): Promise<any> {
+    try {
+      const user = await this.userModel.findById(id);
+      if (!user)
+        throw new HttpException(`User ${id} not found!`, HttpStatus.NOT_FOUND);
+      return { name: user.name, email: user.email, admin: user.isAdmin };
+    } catch (error) {
+      throw new HttpException(
+        'Internal server error',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
   async validateUser(email: string, password: string): Promise<any> {
-    console.log(
-      `[AuthService] validateUser: email=${email}, password=${password}`,
-    );
     const user = await this.userModel.findOne({ email });
     if (!user) throw new HttpException('User not found!', HttpStatus.NOT_FOUND);
+    return user;
   }
 }

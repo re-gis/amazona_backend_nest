@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { Controller, Post, Body, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Get, Param } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { loginDetails } from '../types/loginDetails';
 import { registerDetails } from '../types/registerDetails';
@@ -18,5 +18,12 @@ export class UsersController {
   @Post('login')
   async loginUser(@Body() userDetails: loginDetails) {
     return this.usersService.loginUser(userDetails);
+  }
+
+
+  // @UseGuards(LocalAuthGuard)
+  @Get('profile/:id')
+  async getProfile(@Param('id') id: string) {
+    return this.usersService.getProfile(id);
   }
 }
